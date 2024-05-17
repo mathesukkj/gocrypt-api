@@ -1,6 +1,7 @@
 package models
 
 import (
+	"crypto/aes"
 	"errors"
 	"fmt"
 	"reflect"
@@ -24,6 +25,7 @@ func init() {
 // last inserted Id on success.
 func AddUser(m *User) (id int64, err error) {
 	o := orm.NewOrm()
+
 	id, err = o.Insert(m)
 	return
 }
@@ -141,4 +143,7 @@ func DeleteUser(id int64) (err error) {
 		}
 	}
 	return
+}
+
+func encryptProtectedFields(m *User) {
 }
