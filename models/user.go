@@ -1,20 +1,21 @@
 package models
 
 import (
-	"crypto/aes"
 	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 
 	"github.com/beego/beego/v2/client/orm"
+
+	aescrypt "gocrypt-api/crypto"
 )
 
 type User struct {
 	Id              int64  `orm:"auto"`
-	UserDocument    string `orm:"size(128)"`
-	CreditCardToken string `orm:"size(128)"`
-	Value           int64
+	UserDocument    string `orm:"size(128)" json:"user_document"`
+	CreditCardToken string `orm:"size(128)" json:"credit_card_token"`
+	Value           int64  `                json:"value"`
 }
 
 func init() {
@@ -25,9 +26,9 @@ func init() {
 // last inserted Id on success.
 func AddUser(m *User) (id int64, err error) {
 	o := orm.NewOrm()
-
+	encryptSensibleFields(m)
 	id, err = o.Insert(m)
-	return
+	return id, err
 }
 
 // GetUserById retrieves User by Id. Returns error if
@@ -36,6 +37,7 @@ func GetUserById(id int64) (v *User, err error) {
 	o := orm.NewOrm()
 	v = &User{Id: id}
 	if err = o.QueryTable(new(User)).Filter("Id", id).RelatedSel().One(v); err == nil {
+		decryptSensibleFields(v)
 		return v, nil
 	}
 	return nil, err
@@ -97,12 +99,14 @@ func GetAllUser(query map[string]string, fields []string, sortby []string, order
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
 			for _, v := range l {
+				decryptSensibleFields(&v)
 				ml = append(ml, v)
 			}
 		} else {
 			// trim unused fields
 			for _, v := range l {
 				m := make(map[string]interface{})
+				decryptSensibleFields(&v)
 				val := reflect.ValueOf(v)
 				for _, fname := range fields {
 					m[fname] = val.FieldByName(fname).Interface()
@@ -123,6 +127,7 @@ func UpdateUserById(m *User) (err error) {
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
+		encryptSensibleFields(&v)
 		if num, err = o.Update(m); err == nil {
 			fmt.Println("Number of records updated in database:", num)
 		}
@@ -145,5 +150,12 @@ func DeleteUser(id int64) (err error) {
 	return
 }
 
-func encryptProtectedFields(m *User) {
+func encryptSensibleFields(m *User) {
+	m.UserDocument = aescrypt.EncryptField(m.UserDocument)
+	m.CreditCardToken = aescrypt.EncryptField(m.CreditCardToken)
+}
+
+func decryptSensibleFields(m *User) {
+	m.UserDocument = aescrypt.DecryptField(m.UserDocument)
+	m.CreditCardToken = aescrypt.DecryptField(m.CreditCardToken)
 }

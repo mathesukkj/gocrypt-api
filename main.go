@@ -6,15 +6,14 @@ import (
 
 	"github.com/beego/beego/v2/client/orm"
 	beego "github.com/beego/beego/v2/server/web"
-	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
 	_ "github.com/lib/pq"
 
+	aescrypt "gocrypt-api/crypto"
 	_ "gocrypt-api/routers"
 )
 
 func init() {
-	godotenv.Load(".env")
-
 	orm.RegisterDriver("postgres", orm.DRPostgres)
 
 	connString := fmt.Sprintf(
@@ -32,6 +31,8 @@ func init() {
 	)
 
 	orm.RunSyncdb("default", false, true)
+
+	aescrypt.Init()
 }
 
 func main() {

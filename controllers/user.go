@@ -3,11 +3,12 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"gocrypt-api/models"
 	"strconv"
 	"strings"
 
 	beego "github.com/beego/beego/v2/server/web"
+
+	"gocrypt-api/models"
 )
 
 // UserController operations for User
