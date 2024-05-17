@@ -9,9 +9,17 @@ package routers
 
 import (
 	beego "github.com/beego/beego/v2/server/web"
+
+	"gocrypt-api/controllers"
 )
 
 func init() {
-	ns := beego.NewNamespace("/v1")
+	ns := beego.NewNamespace("/v1",
+		beego.NSNamespace("/user",
+			beego.NSInclude(
+				&controllers.UserController{},
+			),
+		),
+	)
 	beego.AddNamespace(ns)
 }
