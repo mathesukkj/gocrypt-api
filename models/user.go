@@ -12,7 +12,7 @@ import (
 )
 
 type User struct {
-	Id              int64  `orm:"auto"`
+	Id              int64  `orm:"auto"      json:"id"`
 	UserDocument    string `orm:"size(128)" json:"user_document"`
 	CreditCardToken string `orm:"size(128)" json:"credit_card_token"`
 	Value           int64  `                json:"value"`
