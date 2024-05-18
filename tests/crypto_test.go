@@ -13,6 +13,7 @@ import (
 // Testing if encryption/decryption works correctly
 func TestEncryptAndDecryptField(t *testing.T) {
 	os.Setenv("AES_KEY", "a very very very very secret key")
+
 	aescrypt.Init()
 
 	field := "teste"
